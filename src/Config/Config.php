@@ -107,14 +107,13 @@ class Config
 		$name = explode('.', $name, 2);
 		$name[0] = strtolower($name[0]);
 		if( ! isset($this->_config[$range][$name[0]])) {
-			// 尝试自动加载自动加载的配置(注:如果是真正的独立插件,不应该把业务场景代入)
-			$file = '';
-			if(isset($GLOBALS['yi_session']) && is_object($GLOBALS['yi_session'])) { // 数据后台配置才有的
-				$module = $GLOBALS['yi_session']->get('pj_right_version');
-				$file = APP_DIR . $module . DS . 'Conf' . DS . 'extra' . DS . $name[0] . '.php';
-			} elseif(PHP_SAPI == 'cli') {// 盲猜是计划任务
-				$file = CONF_PATH . 'extra' . DS . $name[0] . '.php';
+			// 尝试自动加载自动加载的配置(注:如果没有先行导入配置，这里默认依赖calmu/phpenv 插件的env()函数配置[不强制依赖，需要自己引入])
+			if ($this->get('config_path')) {
+				$file = $this->get('config_path');
+			} else if (function_exists('env')) {
+				$file = env('CONFIG_PATH');
 			}
+			$file .= "extra/{$name[0]}.php";
 			is_file($file) && $this->load($file, $name[0]);
 		}
 		return $this->_config[$range][$name[0]][$name[1]] ?: NULL;
