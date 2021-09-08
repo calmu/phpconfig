@@ -3,6 +3,7 @@
 namespace Calconfig\Config;
 
 use Calfacade\Traits\Instance;
+use Calphelper\Arr;
 
 /**
  * config object 
@@ -81,9 +82,8 @@ class Config
 		if(strpos($name, '.') === FALSE) {
 			return isset($this->_config[$range][$name]);
 		}
-		// 二级配置支持
-		$name = explode('.', $name, 2);
-		return isset($this->_config[$range][strtolower($name[0])][$name[1]]);
+		// 无限级配置支持
+		return Arr::has($this->_config[$range], $name);
 	}
 	/**
 	 * 获得配置项
@@ -104,19 +104,20 @@ class Config
 			return $this->_config[$range][$name] ?: NULL;
 		}
 		// 二级配置支持
-		$name = explode('.', $name, 2);
-		$name[0] = strtolower($name[0]);
-		if( ! isset($this->_config[$range][$name[0]])) {
+		$nameArr = explode('.', $nameArr, 2);
+		$nameArr[0] = strtolower($nameArr[0]);
+		if( ! isset($this->_config[$range][$nameArr[0]])) {
 			// 尝试自动加载自动加载的配置(注:如果没有先行导入配置，这里默认依赖calmu/phpenv 插件的env()函数配置[不强制依赖，需要自己引入])
 			if ($this->get('config_path')) {
 				$file = $this->get('config_path');
 			} else if (function_exists('env')) {
 				$file = env('CONFIG_PATH');
 			}
-			$file .= "extra/{$name[0]}.php";
-			is_file($file) && $this->load($file, $name[0]);
+			$file .= "extra/{$nameArr[0]}.php";
+			is_file($file) && $this->load($file, $nameArr[0]);
 		}
-		return $this->_config[$range][$name[0]][$name[1]] ?: NULL;
+		// 无限级配置支持
+		return Arr::get($this->_config[$range], $name);
 	}
 	/**
 	 * 设置配置项
