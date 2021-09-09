@@ -104,7 +104,7 @@ class Config
 			return $this->_config[$range][$name] ?: NULL;
 		}
 		// 二级配置支持
-		$nameArr = explode('.', $nameArr, 2);
+		$nameArr = explode('.', $name, 2);
 		$nameArr[0] = strtolower($nameArr[0]);
 		if( ! isset($this->_config[$range][$nameArr[0]])) {
 			// 尝试自动加载自动加载的配置(注:如果没有先行导入配置，这里默认依赖calmu/phpenv 插件的env()函数配置[不强制依赖，需要自己引入])
